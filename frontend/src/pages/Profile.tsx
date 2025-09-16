@@ -7,6 +7,7 @@ import GiftForm from '../components/GiftForm';
 interface User {
   id: number;
   name: string;
+  nickname: string;
   email: string;
   bio?: string;
   profile_picture?: string;
@@ -17,6 +18,7 @@ const Profile: React.FC = () => {
   const [user, setUser] = useState<User | null>(null);
   const [friends, setFriends] = useState<User[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [friendNickname, setFriendNickname] = useState('');
 
   const userId = Number(id || localStorage.getItem('userId'));
 
@@ -30,21 +32,32 @@ const Profile: React.FC = () => {
     }
   };
 
-  const fetchFriends = async () => {
-    try {
-      const token = localStorage.getItem('token');
-      const res = await api.get('/users', { headers: { Authorization: `Bearer ${token}` } });
-      // Remove o próprio usuário da lista de amigos
-      setFriends(res.data.filter((u: User) => u.id !== userId));
-    } catch {
-      console.log('Erro ao carregar amigos');
-    }
-  };
+const fetchFriends = async () => {
+  try {
+    const token = localStorage.getItem('token');
+    const res = await api.get(`/friends`, { headers: { Authorization: `Bearer ${token}` } });
+    setFriends(res.data);
+  } catch {
+    console.log('Erro ao carregar amigos');
+  }
+};
 
   useEffect(() => {
     fetchProfile();
     fetchFriends();
   }, [userId]);
+
+  const handleAddFriend = async () => {
+  if (!friendNickname) return;
+  try {
+    const token = localStorage.getItem('token');
+    await api.post(`/friends`, { nickname: friendNickname }, { headers: { Authorization: `Bearer ${token}` } });
+    setFriendNickname('');
+    fetchFriends();
+  } catch (err: any) {
+    alert(err.response?.data.error || 'Erro ao adicionar amigo');
+  }
+};
 
   if (error) return <p style={{ color: 'red' }}>{error}</p>;
   if (!user) return <p>Carregando...</p>;
@@ -61,11 +74,19 @@ const Profile: React.FC = () => {
       <h3>Minha Lista de Presentes</h3>
       <GiftsList userId={user.id} />
 
-      <h3>Amigos</h3>
+      <h3>Adicionar Amigo</h3>
+      <input
+        placeholder="Digite o nickname do amigo"
+        value={friendNickname}
+        onChange={e => setFriendNickname(e.target.value)}
+      />
+      <button onClick={handleAddFriend}>Adicionar</button>
+
+      <h3>Meus Amigos</h3>
       <ul>
         {friends.map(friend => (
           <li key={friend.id}>
-            <Link to={`/profile/${friend.id}`}>{friend.name}</Link>
+            <Link to={`/friend/${friend.id}`}>{friend.name}</Link>
           </li>
         ))}
       </ul>

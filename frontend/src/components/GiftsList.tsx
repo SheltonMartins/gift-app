@@ -32,6 +32,18 @@ const GiftsList: React.FC<GiftsListProps> = ({ userId, onRefresh }) => {
     }
   };
 
+  const handleDelete = async (giftId: number) => {
+  const token = localStorage.getItem('token');
+  try {
+    await axios.delete(`${process.env.REACT_APP_API_URL}/gifts/${giftId}`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    setGifts(gifts.filter(gift => gift.id !== giftId));
+  } catch (err) {
+    setError('Erro ao excluir presente');
+  }
+};
+
   useEffect(() => {
     fetchGifts();
   }, [userId]);
@@ -53,6 +65,7 @@ const GiftsList: React.FC<GiftsListProps> = ({ userId, onRefresh }) => {
               </a>
             </p>
           )}
+           <button onClick={() => handleDelete(gift.id)}>Excluir</button>
         </li>
       ))}
     </ul>

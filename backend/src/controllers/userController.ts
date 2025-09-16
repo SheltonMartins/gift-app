@@ -7,23 +7,32 @@ import jwt = require('jsonwebtoken');
 const db = getDB();
 const JWT_SECRET = 'seu_segredo_aqui';
 
-// Cadastro
+// Cadastro de usuário com nickname obrigatório
 export const registerUser = (req: Request, res: Response) => {
-  const { name, email, password, profile_picture, bio } = req.body;
-  if (!name || !email || !password)
-    return res.status(400).json({ error: 'Campos obrigatórios' });
+  const { name, email, password, nickname, profile_picture, bio } = req.body;
+
+  if (!name || !email || !password || !nickname) {
+    return res.status(400).json({ error: 'Campos obrigatórios: name, email, password, nickname' });
+  }
 
   const password_hash = bcrypt.hashSync(password, 10);
 
   try {
     const stmt = db.prepare(
-      `INSERT INTO users (name, email, password_hash, profile_picture, bio) VALUES (?, ?, ?, ?, ?)`
+      `INSERT INTO users (name, email, password_hash, nickname, profile_picture, bio) 
+       VALUES (?, ?, ?, ?, ?, ?)`
     );
-    const info = stmt.run(name, email, password_hash, profile_picture, bio);
-    res.status(201).json({ message: 'Usuário cadastrado', userId: info.lastInsertRowid });
+    const info = stmt.run(name, email, password_hash, nickname, profile_picture, bio);
+
+    res.status(201).json({
+      message: 'Usuário cadastrado',
+      userId: info.lastInsertRowid,
+    });
   } catch (err: any) {
-    if (err.code === 'SQLITE_CONSTRAINT_UNIQUE')
-      return res.status(400).json({ error: 'Email já cadastrado' });
+    if (err.code === 'SQLITE_CONSTRAINT_UNIQUE') {
+      return res.status(400).json({ error: 'Email ou nickname já cadastrado' });
+    }
+    console.error(err);
     res.status(500).json({ error: 'Erro no servidor' });
   }
 };
@@ -44,19 +53,27 @@ export const loginUser = async (req: Request, res: Response) => {
   res.json({ token, userId: user.id, name: user.name });
 };
 
-// Buscar usuário
+// Buscar usuário pelo ID
 export const getUserById = (req: Request, res: Response) => {
   const { id } = req.params;
   const user = db
-    .prepare('SELECT id, name, email, profile_picture, bio FROM users WHERE id = ?')
+    .prepare('SELECT id, name, email, nickname, profile_picture, bio FROM users WHERE id = ?')
     .get(id);
   if (!user) return res.status(404).json({ error: 'Usuário não encontrado' });
   res.json(user);
 };
 
+// Buscar usuário pelo nickname
+export const searchUserByNickname = (req: Request, res: Response) => {
+  const { nickname } = req.params;
+  const user = db.prepare('SELECT id, name, nickname FROM users WHERE nickname = ?').get(nickname);
+  if (!user) return res.status(404).json({ error: 'Nickname não encontrado' });
+  res.json(user);
+};
+
 // Listar todos os usuários
 export const getAllUsers = (req: Request, res: Response) => {
-  const users = db.prepare('SELECT id, name, email, profile_picture, bio FROM users').all();
+  const users = db.prepare('SELECT id, name, email, nickname, profile_picture, bio FROM users').all();
   res.json(users);
 };
 

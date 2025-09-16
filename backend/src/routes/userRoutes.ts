@@ -4,8 +4,10 @@ import {
   loginUser,
   getUserById,
   getAllUsers,
-  getUserGifts
+  getUserGifts,
+  searchUserByNickname
 } from '../controllers/userController';
+import { addFriend, getFriends } from '../controllers/friendController';
 
 const router = Router();
 
@@ -15,5 +17,10 @@ router.post('/login', loginUser);
 router.get('/', getAllUsers);           // Listar todos os usuários
 router.get('/:id', getUserById);        // Pegar usuário por ID
 router.get('/:id/gifts', getUserGifts); // Listar presentes do usuário
+router.post('/:id/add-friend', addFriend);
+// Buscar usuário por nickname
+router.get('/search/:nickname', searchUserByNickname);
+// Listar amigos do usuário
+router.get('/:id/friends', getFriends);
 
 export default router;

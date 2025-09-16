@@ -25,11 +25,25 @@ export const getUserGifts = (req: Request, res: Response) => {
   }
 };
 
+export const deleteGift = (req: Request, res: Response) => {
+  const giftId = Number(req.params.id);
+  if (!giftId) return res.status(400).json({ error: 'ID do presente inválido' });
+
+  try {
+    const stmt = db.prepare('DELETE FROM gifts WHERE id = ?');
+    const info = stmt.run(giftId);
+    if (info.changes === 0) return res.status(404).json({ error: 'Presente não encontrado' });
+
+    res.json({ message: 'Presente excluído com sucesso' });
+  } catch (err) {
+    res.status(500).json({ error: 'Erro ao excluir presente' });
+  }
+};
+
 // Criar presente (POST /gifts)
 export const createGift = (req: Request, res: Response) => {
   const token = req.headers.authorization?.split(' ')[1];
   if (!token) return res.status(401).json({ error: 'Não autorizado' });
-  console.log(token);
   try {
     const decoded: any = jwt.verify(token, 'seu_segredo_aqui');
     const userId = decoded.id;
