@@ -4,14 +4,18 @@ import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
 import { GlobalStyle } from './styles/GlobalStyle';
+import { GoogleOAuthProvider } from '@react-oauth/google';
 
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
 );
+const clientId = "SEU_CLIENT_ID_DO_GOOGLE.apps.googleusercontent.com";
 root.render(
   <React.StrictMode>
-      <GlobalStyle />
+    <GoogleOAuthProvider clientId={clientId}>
+    <GlobalStyle />
     <App />
+    </GoogleOAuthProvider>
   </React.StrictMode>
 );
 

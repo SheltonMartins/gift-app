@@ -11,8 +11,14 @@ const JWT_SECRET = 'seu_segredo_aqui';
 export const registerUser = (req: Request, res: Response) => {
   const { name, email, password, nickname, profile_picture, bio } = req.body;
 
-  if (!name || !email || !password || !nickname) {
-    return res.status(400).json({ error: 'Campos obrigatórios: name, email, password, nickname' });
+  // Campos obrigatórios
+  if (!name || !email || !nickname) {
+    return res.status(400).json({ error: 'Campos obrigatórios: name, email, nickname' });
+  }
+
+  // Senha obrigatória para cadastro manual
+  if (!password) {
+    return res.status(400).json({ error: 'Senha obrigatória para cadastro manual' });
   }
 
   const password_hash = bcrypt.hashSync(password, 10);
@@ -36,6 +42,8 @@ export const registerUser = (req: Request, res: Response) => {
     res.status(500).json({ error: 'Erro no servidor' });
   }
 };
+
+
 
 // Login
 export const loginUser = async (req: Request, res: Response) => {

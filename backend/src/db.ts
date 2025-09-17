@@ -13,13 +13,13 @@ const dbInstance = new Database(dbPath);
 
 dbInstance.prepare(`
   CREATE TABLE IF NOT EXISTS users (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    name TEXT NOT NULL,
-    email TEXT UNIQUE NOT NULL,
-    password_hash TEXT NOT NULL,
-    nickname TEXT UNIQUE NOT NULL,
-    profile_picture TEXT,
-    bio TEXT
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  name TEXT NOT NULL,
+  email TEXT UNIQUE NOT NULL,
+  nickname TEXT UNIQUE NOT NULL,
+  password_hash TEXT,          
+  profile_picture TEXT,
+  bio TEXT
   )
 `).run();
 

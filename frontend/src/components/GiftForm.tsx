@@ -1,9 +1,10 @@
-// src/components/GiftForm.tsx
 import React, { useState } from 'react';
 import api from '../services/api';
+import { Button, ErrorMessage, FormContainer, Input, InputGroup } from '../styles/GiftForm.Styles';
+
 
 interface Props {
-  userId?: number; // pode ser passado, mas agora o backend pega o user via token
+  userId?: number;
   onGiftAdded?: () => void;
 }
 
@@ -40,22 +41,27 @@ const GiftForm: React.FC<Props> = ({ onGiftAdded }) => {
   };
 
   return (
-    <form onSubmit={handleSubmit}>
-      {error && <p style={{ color: 'red' }}>{error}</p>}
-      <div>
-        <input placeholder="Título" value={title} onChange={e => setTitle(e.target.value)} required />
-      </div>
-      <div>
-        <input placeholder="Descrição" value={description} onChange={e => setDescription(e.target.value)} />
-      </div>
-      <div>
-        <input placeholder="URL da imagem" value={image_url} onChange={e => setImageUrl(e.target.value)} />
-      </div>
-      <div>
-        <input placeholder="Link do produto" value={product_link} onChange={e => setProductLink(e.target.value)} />
-      </div>
-      <button type="submit">Adicionar presente</button>
-    </form>
+    <FormContainer onSubmit={handleSubmit}>
+      {error && <ErrorMessage>{error}</ErrorMessage>}
+      
+      <InputGroup>
+        <Input placeholder="Título" value={title} onChange={e => setTitle(e.target.value)} required />
+      </InputGroup>
+
+      <InputGroup>
+        <Input placeholder="Descrição" value={description} onChange={e => setDescription(e.target.value)} />
+      </InputGroup>
+
+      <InputGroup>
+        <Input placeholder="URL da imagem" value={image_url} onChange={e => setImageUrl(e.target.value)} />
+      </InputGroup>
+
+      <InputGroup>
+        <Input placeholder="Link do produto" value={product_link} onChange={e => setProductLink(e.target.value)} />
+      </InputGroup>
+
+      <Button type="submit">Adicionar presente</Button>
+    </FormContainer>
   );
 };
 

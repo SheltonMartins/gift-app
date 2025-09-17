@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import api from '../services/api';
 import { useNavigate } from 'react-router-dom';
+import { Container, Title, ErrorMessage, Form, Input, Button } from '../styles/Register.Style';
 
 const Register: React.FC = () => {
   const [name, setName] = useState('');
@@ -23,39 +24,39 @@ const Register: React.FC = () => {
   };
 
   return (
-    <div>
-      <h2>Cadastro de Amigos</h2>
-      {error && <p style={{ color: 'red' }}>{error}</p>}
-      <form onSubmit={handleRegister}>
-        <input 
+    <Container>
+      <Title>Cadastre-se para começar a ganhar presentes!</Title>
+      {error && <ErrorMessage>{error}</ErrorMessage>}
+      <Form onSubmit={handleRegister}>
+        <Input 
           placeholder="Nome" 
           value={name} 
           onChange={e => setName(e.target.value)} 
           required 
         />
-        <input 
+        <Input 
           placeholder="Nickname" 
           value={nickname} 
           onChange={e => setNickname(e.target.value)} 
           required 
         />
-        <input 
+        <Input 
           placeholder="Email" 
           type="email" 
           value={email} 
           onChange={e => setEmail(e.target.value)} 
           required 
         />
-        <input 
+        <Input 
           placeholder="Senha" 
           type="password" 
           value={password} 
           onChange={e => setPassword(e.target.value)} 
           required 
         />
-        <button type="submit">Cadastrar</button>
-      </form>
-    </div>
+        <Button type="submit">Cadastrar</Button>
+      </Form>
+    </Container>
   );
 };
 

@@ -1,4 +1,5 @@
 import React from 'react';
+import { Card, Title, Description, Image, ProductLink } from '../styles/GiftCard.Styles';
 
 interface GiftCardProps {
   title: string;
@@ -9,12 +10,18 @@ interface GiftCardProps {
 
 const GiftCard: React.FC<GiftCardProps> = ({ title, description, image_url, product_link }) => {
   return (
-    <div style={{ border: '1px solid #ccc', padding: '1rem', marginBottom: '1rem' }}>
-      <h3>{title}</h3>
-      {description && <p>{description}</p>}
-      {image_url && <img src={image_url} alt={title} style={{ width: '150px' }} />}
-      {product_link && <p><a href={product_link} target="_blank" rel="noreferrer">Comprar</a></p>}
-    </div>
+    <Card>
+      <Title>{title}</Title>
+      {description && <Description>{description}</Description>}
+      {image_url && <Image src={image_url} alt={title} />}
+      {product_link && (
+        <p>
+          <ProductLink href={product_link} target="_blank" rel="noreferrer">
+            Comprar
+          </ProductLink>
+        </p>
+      )}
+    </Card>
   );
 };
 

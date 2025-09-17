@@ -1,29 +1,36 @@
-// src/server.ts
 import express from 'express';
 import cors from 'cors';
+import session from 'express-session';
 import userRoutes from './routes/userRoutes';
 import giftRoutes from './routes/giftRoutes';
-import friendsRoutes from './routes/friendsRoutes';
+import friendRoutes from './routes/friendsRoutes';
+import authRoutes from './routes/authRoutes';
+import protectedRoutes from './routes/protectedRoutes';
+import 'dotenv/config';
 
 const app = express();
 const PORT = 3000;
 
-// Middleware CORS (permitindo requisições do frontend)
+// Middleware CORS
 app.use(cors({
-  origin: 'http://localhost:3001', // porta onde roda o React
-  credentials: true,               // se precisar enviar cookies ou auth
+  origin: 'http://localhost:3001',
+  credentials: true,
 }));
 
-// Middleware para interpretar JSON
 app.use(express.json());
+app.use(session({
+  secret: process.env.SESSION_SECRET || 'chave-secreta',
+  resave: false,
+  saveUninitialized: false,
+}));
 
 // Rotas
 app.use('/users', userRoutes);
 app.use('/gifts', giftRoutes);
-app.use('/friends', friendsRoutes);
+app.use('/friends', friendRoutes);
+app.use('/auth', authRoutes);
+app.use('/protected', protectedRoutes);
 
-// Rota raiz
 app.get('/', (req, res) => res.send('API funcionando 🚀'));
 
-// Inicializa o servidor
 app.listen(PORT, () => console.log(`Servidor rodando em http://localhost:${PORT}`));

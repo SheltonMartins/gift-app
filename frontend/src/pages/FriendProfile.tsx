@@ -1,8 +1,18 @@
-// src/pages/FriendProfile.tsx
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import api from '../services/api';
 import GiftsList from '../components/GiftsList';
+import {
+  Container,
+  Header,
+  ProfileImage,
+  Name,
+  Bio,
+  GiftsSection,
+  ButtonsContainer,
+  Button,
+  ErrorMessage
+} from '../styles/FriendProfile.Styles';
 
 interface Friend {
   id: number;
@@ -41,35 +51,39 @@ const FriendProfile: React.FC = () => {
         headers: { Authorization: `Bearer ${token}` },
       });
       alert('Amizade removida!');
-      navigate('/profile/' + localStorage.getItem('userId')); // volta ao perfil pessoal
+      navigate('/profile/' + localStorage.getItem('userId'));
     } catch (err: any) {
       alert(err.response?.data.error || 'Erro ao remover amizade');
     }
   };
 
-  if (error) return <p style={{ color: 'red' }}>{error}</p>;
+  if (error) return <ErrorMessage>{error}</ErrorMessage>;
   if (!friend) return <p>Carregando...</p>;
 
   return (
-    <div>
-      <h2>{friend.name}</h2>
-      {friend.bio && <p>{friend.bio}</p>}
-      {friend.profile_picture && (
-        <img src={friend.profile_picture} alt={friend.name} width={120} />
-      )}
+    <Container>
+      <Header>
+        {friend.profile_picture && <ProfileImage src={friend.profile_picture} alt={friend.name} />}
+        <div>
+          <Name>{friend.name}</Name>
+          {friend.bio && <Bio>{friend.bio}</Bio>}
+        </div>
+      </Header>
 
-      <h3>Lista de Presentes</h3>
-      <GiftsList userId={friend.id} />
+      <GiftsSection>
+        <h3>Lista de Presentes</h3>
+        <GiftsList userId={friend.id} />
+      </GiftsSection>
 
-      <div style={{ marginTop: '20px' }}>
-        <button onClick={() => navigate(`/profile/${localStorage.getItem('userId')}`)}>
+      <ButtonsContainer>
+        <Button onClick={() => navigate(`/profile/${localStorage.getItem('userId')}`)}>
           Voltar ao meu perfil
-        </button>
-        <button onClick={handleRemoveFriend} style={{ marginLeft: '10px', color: 'red' }}>
+        </Button>
+        <Button danger onClick={handleRemoveFriend}>
           Remover amizade
-        </button>
-      </div>
-    </div>
+        </Button>
+      </ButtonsContainer>
+    </Container>
   );
 };
 
