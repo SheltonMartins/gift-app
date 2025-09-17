@@ -1,3 +1,4 @@
+// src/routes/giftRoutes.ts
 import { Router } from 'express';
 import { getUserGifts, createGift, deleteGift } from '../controllers/giftController';
 
@@ -6,10 +7,10 @@ const router = Router();
 // Lista todos os presentes de um usuário (GET /gifts/:userId)
 router.get('/:userId', getUserGifts);
 
-// Cria um novo presente (POST /gifts)
-// Espera o corpo da requisição com { userId, title, description, image_url, product_link }
+// Cria um novo presente (POST /gifts) -> usa token para definir dono
 router.post('/', createGift);
 
-router.delete('/:id', deleteGift);
+// Deleta presente por id (DELETE /gifts/:giftId) -> só dono consegue
+router.delete('/:giftId', deleteGift);
 
 export default router;

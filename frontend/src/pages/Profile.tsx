@@ -3,6 +3,8 @@ import { useParams, Link } from 'react-router-dom';
 import api from '../services/api';
 import GiftsList from '../components/GiftsList';
 import GiftForm from '../components/GiftForm';
+import { Button, Card, FriendsList, Input, ProfileContainer, SectionTitle, UserHeader } from '../styles/Profile.styles';
+
 
 interface User {
   id: number;
@@ -32,15 +34,15 @@ const Profile: React.FC = () => {
     }
   };
 
-const fetchFriends = async () => {
-  try {
-    const token = localStorage.getItem('token');
-    const res = await api.get(`/friends`, { headers: { Authorization: `Bearer ${token}` } });
-    setFriends(res.data);
-  } catch {
-    console.log('Erro ao carregar amigos');
-  }
-};
+  const fetchFriends = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const res = await api.get(`/friends`, { headers: { Authorization: `Bearer ${token}` } });
+      setFriends(res.data);
+    } catch {
+      console.log('Erro ao carregar amigos');
+    }
+  };
 
   useEffect(() => {
     fetchProfile();
@@ -48,49 +50,63 @@ const fetchFriends = async () => {
   }, [userId]);
 
   const handleAddFriend = async () => {
-  if (!friendNickname) return;
-  try {
-    const token = localStorage.getItem('token');
-    await api.post(`/friends`, { nickname: friendNickname }, { headers: { Authorization: `Bearer ${token}` } });
-    setFriendNickname('');
-    fetchFriends();
-  } catch (err: any) {
-    alert(err.response?.data.error || 'Erro ao adicionar amigo');
-  }
-};
+    if (!friendNickname) return;
+    try {
+      const token = localStorage.getItem('token');
+      await api.post(`/friends`, { nickname: friendNickname }, { headers: { Authorization: `Bearer ${token}` } });
+      setFriendNickname('');
+      fetchFriends();
+    } catch (err: any) {
+      alert(err.response?.data.error || 'Erro ao adicionar amigo');
+    }
+  };
 
   if (error) return <p style={{ color: 'red' }}>{error}</p>;
   if (!user) return <p>Carregando...</p>;
 
   return (
-    <div>
-      <h2>{user.name}</h2>
-      {user.bio && <p>{user.bio}</p>}
-      {user.profile_picture && <img src={user.profile_picture} alt={user.name} width={120} />}
+    <ProfileContainer>
+      <Card>
+        <UserHeader>
+          {user.profile_picture && <img src={user.profile_picture} alt={user.name} />}
+          <h2>{user.name}</h2>
+        </UserHeader>
+        {user.bio && <p>{user.bio}</p>}
+      </Card>
 
-      <h3>Adicionar Presente</h3>
-      <GiftForm userId={user.id} onGiftAdded={fetchProfile} />
+      <Card>
+        <SectionTitle>Adicionar Presente</SectionTitle>
+        <GiftForm userId={user.id} onGiftAdded={fetchProfile} />
+      </Card>
 
-      <h3>Minha Lista de Presentes</h3>
-      <GiftsList userId={user.id} />
+      <Card>
+        <SectionTitle>Minha Lista de Presentes</SectionTitle>
+        <GiftsList userId={user.id} />
+      </Card>
 
-      <h3>Adicionar Amigo</h3>
-      <input
-        placeholder="Digite o nickname do amigo"
-        value={friendNickname}
-        onChange={e => setFriendNickname(e.target.value)}
-      />
-      <button onClick={handleAddFriend}>Adicionar</button>
+      <Card>
+        <SectionTitle>Adicionar Amigo</SectionTitle>
+        <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+          <Input
+            placeholder="Digite o nickname do amigo"
+            value={friendNickname}
+            onChange={e => setFriendNickname(e.target.value)}
+          />
+          <Button onClick={handleAddFriend}>Adicionar</Button>
+        </div>
+      </Card>
 
-      <h3>Meus Amigos</h3>
-      <ul>
-        {friends.map(friend => (
-          <li key={friend.id}>
-            <Link to={`/friend/${friend.id}`}>{friend.name}</Link>
-          </li>
-        ))}
-      </ul>
-    </div>
+      <Card>
+        <SectionTitle>Meus Amigos</SectionTitle>
+        <FriendsList>
+          {friends.map(friend => (
+            <li key={friend.id}>
+              <Link to={`/friend/${friend.id}`}>{friend.name}</Link>
+            </li>
+          ))}
+        </FriendsList>
+      </Card>
+    </ProfileContainer>
   );
 };
 

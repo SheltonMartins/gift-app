@@ -1,7 +1,11 @@
-import React from 'react';
+// src/components/Navbar.tsx
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { Hamburger, Nav, NavLinks } from '../styles/Navbar.Styles';
+
 
 const Navbar: React.FC = () => {
+  const [isOpen, setIsOpen] = useState(false);
   const userName = localStorage.getItem('userName');
   const userId = localStorage.getItem('userId');
 
@@ -11,20 +15,27 @@ const Navbar: React.FC = () => {
   };
 
   return (
-    <nav style={{ padding: '1rem', background: '#eee' }}>
-      <Link to="/">Home</Link> |{' '}
-      {userName && userId ? (
-        <>
-          <Link to={`/profile/${userId}`}>Perfil</Link> |{' '}
-          <button onClick={handleLogout} style={{ cursor: 'pointer' }}>Logout</button>
-        </>
-      ) : (
-        <>
-          <Link to="/login">Login</Link> |{' '}
-          <Link to="/register">Registrar</Link>
-        </>
-      )}
-    </nav>
+    <Nav>
+      <Link to="/" style={{ color: '#fff', fontWeight: '600', fontSize: '18px' }}>GiftApp</Link>
+
+      <Hamburger onClick={() => setIsOpen(!isOpen)}>
+        ☰
+      </Hamburger>
+
+      <NavLinks isOpen={isOpen}>
+        {userName && userId ? (
+          <>
+            <Link to={`/profile/${userId}`}>Perfil</Link>
+            <button onClick={handleLogout}>Logout</button>
+          </>
+        ) : (
+          <>
+            <Link to="/login">Login</Link>
+            <Link to="/register">Registrar</Link>
+          </>
+        )}
+      </NavLinks>
+    </Nav>
   );
 };
 

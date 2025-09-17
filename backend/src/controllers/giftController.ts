@@ -8,35 +8,48 @@ const JWT_SECRET = 'seu_segredo_aqui';
 // Listar presentes de um usuário (GET /gifts/:userId)
 export const getUserGifts = (req: Request, res: Response) => {
   try {
-    const authHeader = req.headers.authorization;
-    if (!authHeader) return res.status(401).json({ error: 'Token não fornecido' });
+    // pega o id explicitamente passado na rota
+    const userId = Number(req.params.userId);
 
-    const token = authHeader.split(' ')[1];
-    if (!token) return res.status(401).json({ error: 'Token inválido' });
+    if (!userId) {
+      return res.status(400).json({ error: 'ID de usuário inválido' });
+    }
 
-    const decoded = jwt.verify(token, JWT_SECRET) as { id: number };
-    const userId = decoded.id;
+    const gifts = db
+      .prepare('SELECT * FROM gifts WHERE user_id = ? ORDER BY created_at DESC')
+      .all(userId);
 
-    const gifts = db.prepare('SELECT * FROM gifts WHERE user_id = ?').all(userId);
     res.json(gifts);
-
   } catch (err) {
+    console.error(err);
     res.status(500).json({ error: 'Erro ao buscar presentes' });
   }
 };
 
 export const deleteGift = (req: Request, res: Response) => {
-  const giftId = Number(req.params.id);
-  if (!giftId) return res.status(400).json({ error: 'ID do presente inválido' });
+  const token = req.headers.authorization?.split(' ')[1];
+  if (!token) return res.status(401).json({ error: 'Não autorizado' });
 
   try {
-    const stmt = db.prepare('DELETE FROM gifts WHERE id = ?');
-    const info = stmt.run(giftId);
-    if (info.changes === 0) return res.status(404).json({ error: 'Presente não encontrado' });
+    const decoded: any = jwt.verify(token, JWT_SECRET);
+    const userId = decoded.id;
 
-    res.json({ message: 'Presente excluído com sucesso' });
+    const giftId = Number(req.params.giftId);
+    if (!giftId) return res.status(400).json({ error: 'ID de presente inválido' });
+
+    const gift = db.prepare('SELECT user_id FROM gifts WHERE id = ?').get(giftId);
+    if (!gift) return res.status(404).json({ error: 'Presente não encontrado' });
+
+    if (gift.user_id !== userId) {
+      // se o usuário do token não for o dono, bloqueia
+      return res.status(403).json({ error: 'Você não tem permissão para excluir este presente' });
+    }
+
+    db.prepare('DELETE FROM gifts WHERE id = ?').run(giftId);
+    res.json({ message: 'Presente removido com sucesso' });
   } catch (err) {
-    res.status(500).json({ error: 'Erro ao excluir presente' });
+    console.error(err);
+    res.status(500).json({ error: 'Erro ao remover presente' });
   }
 };
 

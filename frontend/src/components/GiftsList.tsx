@@ -1,8 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
+import api from '../services/api';
+import { GiftCard, GiftsContainer } from '../styles/GiftsList.styles';
+
 
 interface Gift {
   id: number;
+  user_id: number;
   title: string;
   description?: string;
   image_url?: string;
@@ -12,63 +15,59 @@ interface Gift {
 
 interface GiftsListProps {
   userId: number;
-  onRefresh?: () => void; // callback para atualizar lista
 }
 
-const GiftsList: React.FC<GiftsListProps> = ({ userId, onRefresh }) => {
+const GiftsList: React.FC<GiftsListProps> = ({ userId }) => {
   const [gifts, setGifts] = useState<Gift[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const currentUserId = Number(localStorage.getItem('userId'));
 
   const fetchGifts = async () => {
     try {
       const token = localStorage.getItem('token');
-      const res = await axios.get(`${process.env.REACT_APP_API_URL}/users/${userId}/gifts`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const res = await api.get(`/gifts/${userId}`, { headers: { Authorization: `Bearer ${token}` } });
       setGifts(res.data);
-      if (onRefresh) onRefresh();
     } catch (err) {
       setError('Erro ao carregar presentes');
     }
   };
 
-  const handleDelete = async (giftId: number) => {
-  const token = localStorage.getItem('token');
-  try {
-    await axios.delete(`${process.env.REACT_APP_API_URL}/gifts/${giftId}`, {
-      headers: { Authorization: `Bearer ${token}` }
-    });
-    setGifts(gifts.filter(gift => gift.id !== giftId));
-  } catch (err) {
-    setError('Erro ao excluir presente');
-  }
-};
-
   useEffect(() => {
     fetchGifts();
   }, [userId]);
+
+  const handleDelete = async (giftId: number) => {
+    if (!window.confirm('Excluir este presente?')) return;
+    try {
+      const token = localStorage.getItem('token');
+      await api.delete(`/gifts/${giftId}`, { headers: { Authorization: `Bearer ${token}` } });
+      setGifts(prev => prev.filter(g => g.id !== giftId));
+    } catch (err: any) {
+      alert(err.response?.data?.error || 'Erro ao apagar presente');
+    }
+  };
 
   if (error) return <p style={{ color: 'red' }}>{error}</p>;
   if (gifts.length === 0) return <p>Nenhum presente encontrado</p>;
 
   return (
-    <ul>
+    <GiftsContainer>
       {gifts.map(gift => (
-        <li key={gift.id} style={{ marginBottom: '15px' }}>
+        <GiftCard key={gift.id}>
           <h4>{gift.title}</h4>
           {gift.description && <p>{gift.description}</p>}
-          {gift.image_url && <img src={gift.image_url} alt={gift.title} width={100} />}
+          {/*gift.image_url && <img src={gift.image_url} alt={gift.title} />*/}
           {gift.product_link && (
             <p>
-              <a href={gift.product_link} target="_blank" rel="noopener noreferrer">
-                Ver produto
-              </a>
+              <a href={gift.product_link} target="_blank" rel="noopener noreferrer">Link do presente</a>
             </p>
           )}
-           <button onClick={() => handleDelete(gift.id)}>Excluir</button>
-        </li>
+          {currentUserId === userId && (
+            <button onClick={() => handleDelete(gift.id)}>Excluir</button>
+          )}
+        </GiftCard>
       ))}
-    </ul>
+    </GiftsContainer>
   );
 };
 
